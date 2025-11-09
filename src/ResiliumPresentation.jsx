@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaCogs,
@@ -13,6 +13,9 @@ import {
   FaBullseye,
   FaMoneyBillWave,
   FaBars,
+  FaExpand,
+  FaCompress,
+  FaDownload,
 } from "react-icons/fa";
 
 export default function ResiliumPresentation() {
@@ -30,7 +33,7 @@ export default function ResiliumPresentation() {
       bullets: [
         "Resilium was founded to transform Cambodia’s construction industry through engineering, management, and digital innovation.",
         "Built on the vision of Longdy Ouk (Sumitomo Mitsui, Archetype; Master’s in Service Engineering & Management).",
-        "‘Resilium’ stands for resilience + evolution — building from the ground up for a sustainable, risk-managed future.",
+        "‘Resilium’ means resilience + evolution — building from the ground up for a sustainable, risk-managed future.",
         "Core strengths: Geotechnics, Cost & Risk Management, and Digital Delivery.",
       ],
     },
@@ -136,6 +139,8 @@ export default function ResiliumPresentation() {
   const [index, setIndex] = useState(0);
   const slide = slides[index];
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const presentationRef = useRef(null);
 
   const next = () => setIndex((i) => Math.min(i + 1, slides.length - 1));
   const prev = () => setIndex((i) => Math.max(i - 1, 0));
@@ -144,8 +149,22 @@ export default function ResiliumPresentation() {
     setMenuOpen(false);
   };
 
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      presentationRef.current.requestFullscreen();
+      setIsFullScreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullScreen(false);
+    }
+  };
+
+  const downloadPDF = () => {
+    window.print();
+  };
+
   return (
-    <div className="flex min-h-screen bg-gradient-to-b from-[#F7FBFB] to-white text-[#0B3A57] font-sans">
+    <div ref={presentationRef} className="flex min-h-screen bg-gradient-to-b from-[#F7FBFB] to-white text-[#0B3A57] font-sans">
       {/* Sidebar */}
       <div
         className={`fixed md:static z-20 bg-gradient-to-b from-[#0B3A57] to-[#16808A] text-white md:w-72 w-60 border-r border-gray-200 shadow-xl p-5 transition-transform duration-300 ${
@@ -169,7 +188,7 @@ export default function ResiliumPresentation() {
         </div>
 
         {/* Menu */}
-        <ul className="space-y-2">
+        <ul className="space-y-2 overflow-y-auto max-h-[70vh] pr-1">
           {slides.map((s, i) => (
             <li
               key={s.id}
@@ -184,8 +203,17 @@ export default function ResiliumPresentation() {
           ))}
         </ul>
 
-        <div className="absolute bottom-4 left-5 text-xs text-gray-200">
-          © 2025 Resilium | Longdy Ouk
+        {/* Footer */}
+        <div className="absolute bottom-5 left-5 text-xs text-gray-200 space-y-1">
+          <p>© 2025 Resilium | Longdy Ouk</p>
+          <div className="flex gap-3 mt-2">
+            <button onClick={toggleFullScreen} className="bg-white/20 hover:bg-white/30 p-2 rounded-lg">
+              {isFullScreen ? <FaCompress /> : <FaExpand />}
+            </button>
+            <button onClick={downloadPDF} className="bg-white/20 hover:bg-white/30 p-2 rounded-lg">
+              <FaDownload />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -256,10 +284,7 @@ export default function ResiliumPresentation() {
           <span>
             Slide {index + 1} / {slides.length}
           </span>
-          <button
-            onClick={next}
-            className="px-4 py-2 bg-[#16808A] text-white rounded hover:opacity-90"
-          >
+          <button onClick={next} className="px-4 py-2 bg-[#16808A] text-white rounded hover:opacity-90">
             Next
           </button>
         </div>
